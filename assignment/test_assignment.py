@@ -71,6 +71,36 @@ class TestAssignment01(unittest.TestCase):
     # ------------------------------------------------------------------
     # Tests
     # ------------------------------------------------------------------
+    def test_todos_completed(self):
+        """Check that you've replaced all TODO placeholders with your own code."""
+        source = self._require_source()
+        todo_count = len(re.findall(r'#\s*TODO', source))
+        self.assertEqual(
+            todo_count, 0,
+            f"Found {todo_count} TODO comment(s) still in your code.\n"
+            f"  Replace each TODO section with your own code."
+        )
+
+    def test_no_pass_only_functions(self):
+        """Check that functions have real implementations, not just 'pass'."""
+        tree = self._require_tree()
+        pass_only = []
+        for node in ast.walk(tree):
+            if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
+                body = node.body
+                # Skip docstring if present
+                real_body = body
+                if body and isinstance(body[0], ast.Expr) and isinstance(getattr(body[0].value, 'value', None), str):
+                    real_body = body[1:]
+                if len(real_body) == 0 or (len(real_body) == 1 and isinstance(real_body[0], ast.Pass)):
+                    pass_only.append(node.name)
+        self.assertEqual(
+            len(pass_only), 0,
+            f"These functions are still empty (just 'pass'):\n"
+            f"  {', '.join(pass_only)}\n"
+            f"  Add your implementation to each one!"
+        )
+
     def test_file_exists_and_parses(self):
         """Check that scene_builder.py exists and has no syntax errors."""
         path = get_file_path()
@@ -132,9 +162,9 @@ class TestAssignment01(unittest.TestCase):
         )
         count = len(poly_calls)
         self.assertGreaterEqual(
-            count, 5,
+            count, 6,
             f"Found only {count} object-creation call(s) (cmds.poly*, cmds.create*, etc.).\n"
-            f"  Your scene should create at least 5 objects. Keep building!"
+            f"  Your scene should create at least 6 objects. Keep building!"
         )
 
     def test_descriptive_variable_names(self):
@@ -155,11 +185,11 @@ class TestAssignment01(unittest.TestCase):
                             descriptive_count += 1
 
         self.assertGreaterEqual(
-            descriptive_count, 8,
+            descriptive_count, 12,
             f"Found only {descriptive_count} variable assignment(s) with descriptive names "
             f"(more than 3 characters).\n"
             f"  Use names like 'cube_height' or 'tree_position' instead of 'h' or 'pos'.\n"
-            f"  Aim for at least 8 descriptive variable names."
+            f"  Aim for at least 12 descriptive variable names."
         )
 
     def test_no_single_letter_variables(self):
