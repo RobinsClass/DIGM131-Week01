@@ -316,4 +316,6 @@ if __name__ == "__main__":
     loader = unittest.TestLoader()
     suite = loader.loadTestsFromTestCase(TestAssignment01)
     runner = FriendlyRunner()
-    runner.run(suite)
+    result = runner.run(suite)
+    # Exit with non-zero code if any tests failed (for CI/autograding)
+    sys.exit(0 if result.successes == result.total else 1)
